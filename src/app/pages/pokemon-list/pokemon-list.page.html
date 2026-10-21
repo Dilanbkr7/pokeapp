@@ -1,18 +1,601 @@
+
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Pokémon List</ion-title>
+  <ion-toolbar class="main-toolbar">
+    <ion-title>POKEDEX</ion-title>
+
+    <ion-buttons slot="end">
+      <!-- VOLVER DESDE LOS DETALLES -->
+      <ion-button
+        *ngIf="selectedPokemon && !compareMode"
+        (click)="closeDetails()"
+      >
+        <ion-icon
+          name="arrow-back-outline"
+          slot="icon-only"
+        ></ion-icon>
+      </ion-button>
+
+      <!-- ABRIR COMPARADOR -->
+      <ion-button
+        *ngIf="!selectedPokemon && !compareMode"
+        (click)="openCompareMode()"
+      >
+        <ion-icon
+          name="git-compare-outline"
+          slot="start"
+        ></ion-icon>
+        Comparar
+      </ion-button>
+
+      <!-- CERRAR COMPARADOR -->
+      <ion-button
+        *ngIf="compareMode"
+        (click)="closeCompareMode()"
+      >
+        <ion-icon
+          name="arrow-back-outline"
+          slot="icon-only"
+        ></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-list>
-    <ion-item *ngFor="let pokemon of pokemons">
-      <ion-label>{{ pokemon.name | titlecase }}</ion-label>
-      <a href="{{ pokemon.url}}"><ion-label>{{ pokemon.url}}</ion-label></a>
-      
-    </ion-item>
-  
-  </ion-list>
+<ion-content [fullscreen]="true" class="dark-content">
 
-  <ion-spinner *ngIf="loading" class="loading-spinner"></ion-spinner>
+  <!-- ====================================== -->
+  <!-- LISTA DE POKÉMON                      -->
+  <!-- ====================================== -->
+
+  <ng-container *ngIf="!selectedPokemon && !compareMode">
+
+    <section class="intro">
+      <span class="eyebrow">
+        APLICACIONES MOVILES - DILAN OBANDO
+      </span>
+
+      <h1>Descubre tu Pokémon.</h1>
+      <p>Explora, busca y conoce sus estadísticas.</p>
+    </section>
+
+    <!-- BUSCADOR -->
+    <ion-searchbar
+      class="pokemon-search"
+      placeholder="Buscar Pokémon..."
+      animated="true"
+      (ionInput)="searchPokemon($event)"
+    ></ion-searchbar>
+
+    <!-- CARGA DE POKÉMON -->
+    <div class="status" *ngIf="loading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando Pokémon...</p>
+    </div>
+
+    <!-- ERROR DE CARGA -->
+    <div
+      class="status error"
+      *ngIf="!loading && error"
+    >
+      <p>{{ error }}</p>
+
+      <ion-button
+        (click)="fetchPokemons()"
+        color="success"
+      >
+        Intentar de nuevo
+      </ion-button>
+    </div>
+
+    <!-- TARJETAS DE POKÉMON -->
+    <ion-grid *ngIf="!loading && !error">
+      <ion-row>
+        <ion-col
+          size="6"
+          size-md="4"
+          size-lg="3"
+          *ngFor="let pokemon of filteredPokemons"
+        >
+          <ion-card
+            class="pokemon-card"
+            button="true"
+            (click)="openPokemon(pokemon)"
+          >
+            <ion-card-content>
+              <span class="pokemon-number">
+                #{{ getPokemonId(pokemon.url).padStart(3, '0') }}
+              </span>
+
+              <img
+                [src]="getPokemonImage(pokemon.url)"
+                [alt]="pokemon.name"
+                loading="lazy"
+              >
+
+              <h2>{{ pokemon.name | titlecase }}</h2>
+
+              <span class="view-details">
+                VER DETALLES
+                <ion-icon
+                  name="arrow-forward-outline"
+                ></ion-icon>
+              </span>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <!-- SIN RESULTADOS -->
+    <div
+      class="status"
+      *ngIf="
+        !loading &&
+        !error &&
+        filteredPokemons.length === 0
+      "
+    >
+      No se encontraron Pokémon.
+    </div>
+
+  </ng-container>
+
+  <!-- ====================================== -->
+  <!-- NIVEL 3: COMPARADOR DE POKÉMON         -->
+  <!-- ====================================== -->
+
+  <section class="compare-page" *ngIf="compareMode">
+
+    <!-- PRESENTACIÓN DEL COMPARADOR -->
+    <div class="compare-intro">
+      <span class="eyebrow">
+        NIVEL 3 · COMPARACIÓN
+      </span>
+
+      <h1>¿Quién es más fuerte?</h1>
+
+      <p>
+        Elige dos Pokémon y compara sus estadísticas.
+      </p>
+    </div>
+
+    <!-- SELECTORES -->
+    <div class="compare-selectors">
+
+      <!-- PRIMER POKÉMON -->
+      <div class="compare-selector">
+        <label for="pokemonA">
+          Primer Pokémon
+        </label>
+
+        <ion-select
+          id="pokemonA"
+          interface="action-sheet"
+          placeholder="Seleccionar Pokémon"
+          [(ngModel)]="compareNameA"
+        >
+          <ion-select-option
+            *ngFor="let pokemon of pokemons"
+            [value]="pokemon.name"
+          >
+            {{ pokemon.name | titlecase }}
+          </ion-select-option>
+        </ion-select>
+      </div>
+
+      <!-- VS -->
+      <div class="compare-versus">
+        VS
+      </div>
+
+      <!-- SEGUNDO POKÉMON -->
+      <div class="compare-selector">
+        <label for="pokemonB">
+          Segundo Pokémon
+        </label>
+
+        <ion-select
+          id="pokemonB"
+          interface="action-sheet"
+          placeholder="Seleccionar Pokémon"
+          [(ngModel)]="compareNameB"
+        >
+          <ion-select-option
+            *ngFor="let pokemon of pokemons"
+            [value]="pokemon.name"
+          >
+            {{ pokemon.name | titlecase }}
+          </ion-select-option>
+        </ion-select>
+      </div>
+
+    </div>
+
+    <!-- BOTÓN DE COMPARACIÓN -->
+    <button
+      class="compare-button"
+      [disabled]="compareLoading"
+      (click)="runComparison()"
+    >
+      <ion-spinner
+        *ngIf="compareLoading"
+        name="crescent"
+      ></ion-spinner>
+
+      <span *ngIf="!compareLoading">
+        Comparar Pokémon
+      </span>
+
+      <span *ngIf="compareLoading">
+        Comparando...
+      </span>
+    </button>
+
+    <!-- ERROR DEL COMPARADOR -->
+    <p
+      class="compare-error"
+      *ngIf="compareError"
+    >
+      {{ compareError }}
+    </p>
+
+    <!-- RESULTADOS -->
+    <div
+      class="compare-results"
+      *ngIf="comparePokemonA && comparePokemonB"
+    >
+
+      <!-- TARJETAS DE LOS DOS POKÉMON -->
+      <div class="compare-grid">
+
+        <!-- PRIMER POKÉMON -->
+        <article class="compare-card">
+          <span class="compare-number">
+            #{{ comparePokemonA.id.toString().padStart(3, '0') }}
+          </span>
+
+          <img
+            [src]="getOfficialArtwork(comparePokemonA)"
+            [alt]="comparePokemonA.name"
+          >
+
+          <h2>
+            {{ comparePokemonA.name | titlecase }}
+          </h2>
+
+          <div class="type-list">
+            <span
+              class="type-badge"
+              *ngFor="let item of comparePokemonA.types"
+            >
+              {{ item.type.name | titlecase }}
+            </span>
+          </div>
+        </article>
+
+        <!-- SEGUNDO POKÉMON -->
+        <article class="compare-card">
+          <span class="compare-number">
+            #{{ comparePokemonB.id.toString().padStart(3, '0') }}
+          </span>
+
+          <img
+            [src]="getOfficialArtwork(comparePokemonB)"
+            [alt]="comparePokemonB.name"
+          >
+
+          <h2>
+            {{ comparePokemonB.name | titlecase }}
+          </h2>
+
+          <div class="type-list">
+            <span
+              class="type-badge"
+              *ngFor="let item of comparePokemonB.types"
+            >
+              {{ item.type.name | titlecase }}
+            </span>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- COMPARACIÓN DE ESTADÍSTICAS -->
+      <section class="comparison-statistics">
+        <h2>Comparación de estadísticas</h2>
+
+        <div
+          class="compare-stat"
+          *ngFor="let stat of comparisonStats"
+        >
+          <div class="compare-stat-title">
+            {{ stat.label }}
+          </div>
+
+          <div class="compare-stat-pair">
+
+            <!-- ESTADÍSTICA DEL PRIMER POKÉMON -->
+            <div class="compare-stat-side">
+              <strong>
+                {{ getCompareStat(comparePokemonA, stat.key) }}
+              </strong>
+
+              <div class="stat-track">
+                <div
+                  class="stat-fill"
+                  [style.width.%]="
+                    getStatPercentage(
+                      getCompareStat(comparePokemonA, stat.key)
+                    )
+                  "
+                  [style.background]="getStatColor(stat.key)"
+                ></div>
+              </div>
+            </div>
+
+            <!-- ESTADÍSTICA DEL SEGUNDO POKÉMON -->
+            <div class="compare-stat-side">
+              <strong>
+                {{ getCompareStat(comparePokemonB, stat.key) }}
+              </strong>
+
+              <div class="stat-track">
+                <div
+                  class="stat-fill"
+                  [style.width.%]="
+                    getStatPercentage(
+                      getCompareStat(comparePokemonB, stat.key)
+                    )
+                  "
+                  [style.background]="getStatColor(stat.key)"
+                ></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ACLARACIÓN -->
+      <p class="compare-note">
+        Las barras muestran los valores base de cada estadística.
+        Un valor mayor no garantiza ganar un combate.
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- ====================================== -->
+  <!-- CARGA DE DETALLES                     -->
+  <!-- ====================================== -->
+
+  <div
+    class="status detail-loading"
+    *ngIf="loadingDetails"
+  >
+    <ion-spinner
+      name="crescent"
+      color="success"
+    ></ion-spinner>
+
+    <p>Consultando la Pokédex...</p>
+  </div>
+
+  <!-- ERROR DE DETALLES -->
+  <div
+    class="status error"
+    *ngIf="!loadingDetails && detailError"
+  >
+    <p>{{ detailError }}</p>
+
+    <ion-button
+      color="success"
+      (click)="closeDetails()"
+    >
+      Volver a la lista
+    </ion-button>
+  </div>
+
+  <!-- ====================================== -->
+  <!-- FICHA DEL POKÉMON                     -->
+  <!-- ====================================== -->
+
+  <ng-container
+    *ngIf="selectedPokemon && !loadingDetails"
+  >
+
+    <!-- PRESENTACIÓN PRINCIPAL -->
+    <section class="detail-hero">
+
+      <button
+        class="back-button"
+        (click)="closeDetails()"
+      >
+        <ion-icon name="arrow-back-outline"></ion-icon>
+        Volver a la Pokédex
+      </button>
+
+      <span class="detail-number">
+        N.º {{ selectedPokemon.id.toString().padStart(3, '0') }}
+      </span>
+
+      <img
+        class="detail-image"
+        [src]="getOfficialArtwork(selectedPokemon)"
+        [alt]="selectedPokemon.name"
+      >
+
+      <h1>
+        {{ formatName(selectedPokemon.name) | titlecase }}
+      </h1>
+
+      <div class="type-list">
+        <span
+          class="type-badge"
+          *ngFor="let item of selectedPokemon.types"
+        >
+          {{ item.type.name | titlecase }}
+        </span>
+      </div>
+
+    </section>
+
+    <!-- INFORMACIÓN GENERAL -->
+    <section class="detail-section">
+      <h2>Información general</h2>
+
+      <div class="info-grid">
+
+        <div class="info-card">
+          <span class="info-label">ALTURA</span>
+          <strong>
+            {{ selectedPokemon.height / 10 }} m
+          </strong>
+        </div>
+
+        <div class="info-card">
+          <span class="info-label">PESO</span>
+          <strong>
+            {{ selectedPokemon.weight / 10 }} kg
+          </strong>
+        </div>
+
+        <div class="info-card">
+          <span class="info-label">EXPERIENCIA BASE</span>
+          <strong>
+            {{ selectedPokemon.base_experience ?? 'N/D' }}
+          </strong>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SONIDO DEL POKÉMON -->
+    <section class="detail-section multimedia-section">
+      <h2>Escucha su sonido</h2>
+
+      <button
+        class="sound-button"
+        *ngIf="!audioPlaying"
+        (click)="playCry()"
+      >
+        <ion-icon name="volume-high-outline"></ion-icon>
+        Reproducir sonido
+      </button>
+
+      <button
+        class="sound-button stop-button"
+        *ngIf="audioPlaying"
+        (click)="stopCry()"
+      >
+        <ion-icon name="stop-circle-outline"></ion-icon>
+        Detener sonido
+      </button>
+
+      <p
+        class="audio-message"
+        *ngIf="audioMessage"
+      >
+        {{ audioMessage }}
+      </p>
+    </section>
+
+    <!-- GALERÍA -->
+    <section class="detail-section gallery-section">
+      <h2>Galería</h2>
+
+      <p class="section-description">
+        Diferentes vistas de
+        {{ selectedPokemon.name | titlecase }}.
+        Toca una imagen para ampliarla.
+      </p>
+
+      <div class="gallery-grid">
+        <button
+          class="gallery-item"
+          *ngFor="let image of galleryImages"
+          (click)="openImage(image)"
+        >
+          <img
+            [src]="image.url"
+            [alt]="image.label"
+            (error)="hideBrokenImage($event, image)"
+            loading="lazy"
+          >
+
+          <span>{{ image.label }}</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- VISOR DE IMAGEN AMPLIADA -->
+    <div
+      class="image-viewer"
+      *ngIf="expandedImage"
+      (click)="closeImage()"
+    >
+      <button
+        class="image-viewer-close"
+        aria-label="Cerrar imagen"
+        (click)="closeImage()"
+      >
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+
+      <img
+        [src]="expandedImage.url"
+        [alt]="expandedImage.label"
+        (click)="$event.stopPropagation()"
+      >
+
+      <p>{{ expandedImage.label }}</p>
+    </div>
+
+    <!-- ESTADÍSTICAS -->
+    <section class="detail-section">
+      <h2>Estadísticas</h2>
+
+      <p class="section-description">
+        Valores base de este Pokémon.
+      </p>
+
+      <div
+        class="stat-row"
+        *ngFor="let stat of selectedPokemon.stats"
+      >
+        <div class="stat-heading">
+          <span>
+            {{ formatStatName(stat.stat.name) }}
+          </span>
+
+          <strong>{{ stat.base_stat }}</strong>
+        </div>
+
+        <div class="stat-track">
+          <div
+            class="stat-fill"
+            [style.width.%]="getStatPercentage(stat.base_stat)"
+            [style.background]="getStatColor(stat.stat.name)"
+          ></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HABILIDADES -->
+    <section class="detail-section abilities-section">
+      <h2>Habilidades</h2>
+
+      <div class="ability-list">
+        <span
+          class="ability-badge"
+          *ngFor="let ability of selectedPokemon.abilities"
+        >
+          {{ formatName(ability.ability.name) | titlecase }}
+        </span>
+      </div>
+    </section>
+
+  </ng-container>
+
 </ion-content>

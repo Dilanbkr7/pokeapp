@@ -1,23 +1,35 @@
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
+export interface Pokemon {
+  name: string;
+  url: string;
+}
+
+export interface PokemonListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Pokemon[];
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class PokemonService {
-  private apiUrl = 'https://pokeapi.co/api/v2';
+  private apiUrl = 'https://pokeapi.co/api/v2/pokemon';
 
   constructor(private http: HttpClient) {}
 
-  // Obtener la lista de Pokémon
-  getPokemons(limit: number = 5, offset: number = 0): Observable<any> {
-    return this.http.get(`${this.apiUrl}/pokemon?limit=${limit}&offset=${offset}`);
-                                          
+  getPokemons(limit: number = 50, offset: number = 0): Observable<PokemonListResponse> {
+    return this.http.get<PokemonListResponse>(
+      `${this.apiUrl}?limit=${limit}&offset=${offset}`
+    );
   }
 
-  // Obtener detalles de un Pokémon por nombre o ID
-  getPokemonDetails(nameOrId: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/pokemon/${nameOrId}`);
+  getPokemonDetails(nameOrId: string | number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${nameOrId}`);
   }
 }

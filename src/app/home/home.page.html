@@ -1,20 +1,61 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+
+<ion-header>
+  <ion-toolbar color="danger">
+    <ion-title>APP MOVILES - Dilan Obando</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <div class="intro">
+    <h1>Pokémon</h1>
+    <p>Explora los primeros 50 Pokémon</p>
   </div>
+
+  <ion-searchbar
+    placeholder="Buscar Pokémon..."
+    animated="true"
+    (ionInput)="searchPokemon($event)">
+  </ion-searchbar>
+
+  <div class="status" *ngIf="loading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando Pokémon...</p>
+  </div>
+
+  <div class="status" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <ion-grid *ngIf="!loading && !error">
+    <ion-row>
+      <ion-col
+        size="6"
+        size-md="4"
+        size-lg="3"
+        *ngFor="let pokemon of filteredPokemon">
+
+        <ion-card class="pokemon-card">
+          <ion-card-content>
+            <span class="pokemon-number">
+              #{{ getPokemonId(pokemon.url).padStart(3, '0') }}
+            </span>
+
+            <img
+              [src]="getPokemonImage(pokemon.url)"
+              [alt]="pokemon.name"
+              loading="lazy">
+
+            <h2>{{ pokemon.name | titlecase }}</h2>
+          </ion-card-content>
+        </ion-card>
+
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <p
+    class="status"
+    *ngIf="!loading && !error && filteredPokemon.length === 0">
+    No se encontraron Pokémon.
+  </p>
 </ion-content>
