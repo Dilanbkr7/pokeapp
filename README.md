@@ -5,15 +5,64 @@ Aplicación desarrollada para la asignatura **Aplicaciones Móviles**, que permi
 **Autor:** Dilan Obando  
 **Repositorio:** [Dilanbkr7/pokeapp](https://github.com/Dilanbkr7/pokeapp)
 
+## Capturas en celular
+
+Evidencias proporcionadas de la aplicación en un dispositivo Android, organizadas según las tres etapas del trabajo.
+
+### Nivel 1 · Catálogo, búsqueda y estadísticas
+
+<table>
+  <tr>
+    <th>Catálogo principal</th>
+    <th>Búsqueda de Vileplume</th>
+    <th>Estadísticas y habilidades</th>
+  </tr>
+  <tr>
+    <td><img src="docs/capturas/nivel-1-inicio.jpeg" alt="Catálogo de Pokémon con buscador en un celular Android" width="240"></td>
+    <td><img src="docs/capturas/nivel-1-busqueda.jpeg" alt="Resultado de buscar vil: Vileplume número 045" width="240"></td>
+    <td><img src="docs/capturas/nivel-1-estadisticas.jpeg" alt="Estadísticas base y sección de habilidades de Vileplume" width="240"></td>
+  </tr>
+</table>
+
+### Nivel 2 · Ficha, sonido y galería
+
+<table>
+  <tr>
+    <th>Ficha de Pikachu</th>
+    <th>Control de sonido</th>
+    <th>Galería de imágenes</th>
+  </tr>
+  <tr>
+    <td><img src="docs/capturas/nivel-2-ficha.jpeg" alt="Ficha de Pikachu con tipo eléctrico, altura, peso y experiencia base" width="240"></td>
+    <td><img src="docs/capturas/nivel-2-sonido.jpeg" alt="Botón para reproducir el sonido de Pikachu y comienzo de la galería" width="240"></td>
+    <td><img src="docs/capturas/nivel-2-galeria.jpeg" alt="Galería de Pikachu con ocho vistas e ilustraciones visibles" width="240"></td>
+  </tr>
+</table>
+
+### Nivel 3 · Comparación de Squirtle y Blastoise
+
+<table>
+  <tr>
+    <th>Selección de Pokémon</th>
+    <th>Resultado de la consulta</th>
+    <th>Comparación de estadísticas</th>
+  </tr>
+  <tr>
+    <td><img src="docs/capturas/nivel-3-seleccion.jpeg" alt="Selectores con Squirtle y Blastoise y botón Comparar Pokémon" width="240"></td>
+    <td><img src="docs/capturas/nivel-3-resultado.jpeg" alt="Ilustración y nombre de Squirtle en los resultados de la comparación" width="240"></td>
+    <td><img src="docs/capturas/nivel-3-estadisticas.jpeg" alt="Comparación de las seis estadísticas base de Squirtle y Blastoise" width="240"></td>
+  </tr>
+</table>
+
 ## Contenido
 
+- [Capturas en celular](#capturas-en-celular)
 - [Descripción](#descripción)
 - [Funcionalidades por nivel](#funcionalidades-por-nivel)
 - [Tecnologías](#tecnologías)
 - [Instalación y ejecución](#instalación-y-ejecución)
 - [Uso de la API](#uso-de-la-api)
 - [Estructura del proyecto](#estructura-del-proyecto)
-- [Capturas en celular](#capturas-en-celular)
 - [Estado y alcance](#estado-y-alcance)
 - [Créditos](#créditos)
 
@@ -156,55 +205,6 @@ pokeapp/
 ├── capacitor.config.ts              # Configuración de Capacitor
 └── package.json                     # Dependencias y comandos
 ```
-
-## Capturas en celular
-
-Evidencias proporcionadas de la aplicación en un dispositivo Android, organizadas según las tres etapas del trabajo.
-
-### Nivel 1 · Catálogo, búsqueda y estadísticas
-
-<table>
-  <tr>
-    <th>Catálogo principal</th>
-    <th>Búsqueda de Vileplume</th>
-    <th>Estadísticas y habilidades</th>
-  </tr>
-  <tr>
-    <td><img src="docs/capturas/nivel-1-inicio.jpeg" alt="Catálogo de Pokémon con buscador en un celular Android" width="240"></td>
-    <td><img src="docs/capturas/nivel-1-busqueda.jpeg" alt="Resultado de buscar vil: Vileplume número 045" width="240"></td>
-    <td><img src="docs/capturas/nivel-1-estadisticas.jpeg" alt="Estadísticas base y sección de habilidades de Vileplume" width="240"></td>
-  </tr>
-</table>
-
-### Nivel 2 · Ficha, sonido y galería
-
-<table>
-  <tr>
-    <th>Ficha de Pikachu</th>
-    <th>Control de sonido</th>
-    <th>Galería de imágenes</th>
-  </tr>
-  <tr>
-    <td><img src="docs/capturas/nivel-2-ficha.jpeg" alt="Ficha de Pikachu con tipo eléctrico, altura, peso y experiencia base" width="240"></td>
-    <td><img src="docs/capturas/nivel-2-sonido.jpeg" alt="Botón para reproducir el sonido de Pikachu y comienzo de la galería" width="240"></td>
-    <td><img src="docs/capturas/nivel-2-galeria.jpeg" alt="Galería de Pikachu con ocho vistas e ilustraciones visibles" width="240"></td>
-  </tr>
-</table>
-
-### Nivel 3 · Comparación de Squirtle y Blastoise
-
-<table>
-  <tr>
-    <th>Selección de Pokémon</th>
-    <th>Resultado de la consulta</th>
-    <th>Comparación de estadísticas</th>
-  </tr>
-  <tr>
-    <td><img src="docs/capturas/nivel-3-seleccion.jpeg" alt="Selectores con Squirtle y Blastoise y botón Comparar Pokémon" width="240"></td>
-    <td><img src="docs/capturas/nivel-3-resultado.jpeg" alt="Ilustración y nombre de Squirtle en los resultados de la comparación" width="240"></td>
-    <td><img src="docs/capturas/nivel-3-estadisticas.jpeg" alt="Comparación de las seis estadísticas base de Squirtle y Blastoise" width="240"></td>
-  </tr>
-</table>
 
 ## Estado y alcance
 
