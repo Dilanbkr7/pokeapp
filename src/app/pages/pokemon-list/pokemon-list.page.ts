@@ -1,7 +1,10 @@
 
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { IonicModule } from '@ionic/angular';
 import { forkJoin } from 'rxjs';
-import { PokemonService } from 'src/app/services/pokemon.service';
+import { PokemonService } from '../../services/pokemon.service';
 
 interface Pokemon {
   name: string;
@@ -17,35 +20,28 @@ interface GalleryImage {
   selector: 'app-pokemon-list',
   templateUrl: './pokemon-list.page.html',
   styleUrls: ['./pokemon-list.page.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonicModule]
 })
-export class PokemonListPage implements OnInit {
-  // LISTA DE POKÉMON
+export class PokemonListPage implements OnInit, OnDestroy {
+
   pokemons: Pokemon[] = [];
   filteredPokemons: Pokemon[] = [];
 
-  // DETALLES DEL POKÉMON
   selectedPokemon: any = null;
   galleryImages: GalleryImage[] = [];
   expandedImage: GalleryImage | null = null;
 
-  // ESTADOS DE CARGA Y ERRORES
   loading = true;
   loadingDetails = false;
   error = '';
   detailError = '';
 
-  // SONIDO DEL POKÉMON
   audioPlaying = false;
   audioMessage = '';
   private audioPlayer: HTMLAudioElement | null = null;
 
-  // ANIMACIÓN DEL POKÉMON
-  animationUrl = '';
-  animationAvailable = true;
-
-  // NIVEL 3: COMPARADOR
   compareMode = false;
-
   compareNameA = 'pikachu';
   compareNameB = 'charizard';
 
@@ -59,9 +55,9 @@ export class PokemonListPage implements OnInit {
     { key: 'hp', label: 'PS' },
     { key: 'attack', label: 'Ataque' },
     { key: 'defense', label: 'Defensa' },
-    { key: 'special-attack', label: 'At. especial' },
-    { key: 'special-defense', label: 'Def. especial' },
-    { key: 'speed', label: 'Velocidad' },
+    { key: 'special-attack', label: 'Ataque especial' },
+    { key: 'special-defense', label: 'Defensa especial' },
+    { key: 'speed', label: 'Velocidad' }
   ];
 
   constructor(private pokemonService: PokemonService) {}
@@ -70,46 +66,37 @@ export class PokemonListPage implements OnInit {
     this.fetchPokemons();
   }
 
-  // ==========================================
-  // CARGAR LA LISTA DE POKÉMON
-  // ==========================================
+  ngOnDestroy(): void {
+    this.stopCry();
+  }
 
   fetchPokemons(): void {
     this.loading = true;
     this.error = '';
 
     this.pokemonService.getPokemons(50).subscribe({
-      next: (response) => {
+      next: response => {
         this.pokemons = response.results;
         this.filteredPokemons = response.results;
         this.loading = false;
       },
-      error: (error) => {
-        console.error('Error al cargar Pokémon:', error);
-
-        this.error = 'No se pudieron cargar los Pokémon.';
+      error: error => {
+        console.error('Error de PokéAPI:', error);
+        this.error = 'No se pudieron cargar los Pokémon. Comprueba tu conexión.';
         this.loading = false;
-      },
+      }
     });
   }
-
-  // ==========================================
-  // BUSCAR POKÉMON
-  // ==========================================
 
   searchPokemon(event: any): void {
     const search = (event.detail.value || '')
       .toLowerCase()
       .trim();
 
-    this.filteredPokemons = this.pokemons.filter((pokemon) =>
+    this.filteredPokemons = this.pokemons.filter(pokemon =>
       pokemon.name.toLowerCase().includes(search)
     );
   }
-
-  // ==========================================
-  // OBTENER ID E IMAGEN
-  // ==========================================
 
   getPokemonId(url: string): string {
     return url.split('/').filter(Boolean).pop() || '';
@@ -121,10 +108,6 @@ export class PokemonListPage implements OnInit {
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
   }
 
-  // ==========================================
-  // ABRIR DETALLES DEL POKÉMON
-  // ==========================================
-
   openPokemon(pokemon: Pokemon): void {
     const id = this.getPokemonId(pokemon.url);
 
@@ -134,36 +117,23 @@ export class PokemonListPage implements OnInit {
     this.selectedPokemon = null;
     this.galleryImages = [];
     this.expandedImage = null;
-    this.animationUrl = '';
-    this.animationAvailable = true;
-    this.loadingDetails = true;
     this.detailError = '';
     this.audioMessage = '';
+    this.loadingDetails = true;
 
     this.pokemonService.getPokemonDetails(id).subscribe({
-      next: (details) => {
+      next: details => {
         this.selectedPokemon = details;
         this.galleryImages = this.buildGallery(details);
-
-        this.animationUrl =
-          `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${details.id}.gif`;
-
         this.loadingDetails = false;
       },
-      error: (error) => {
-        console.error('Error al cargar los detalles:', error);
-
-        this.detailError =
-          'No se pudieron cargar los detalles. Intenta de nuevo.';
-
+      error: error => {
+        console.error('Error al cargar detalles:', error);
+        this.detailError = 'No se pudieron cargar los detalles. Intenta nuevamente.';
         this.loadingDetails = false;
-      },
+      }
     });
   }
-
-  // ==========================================
-  // CERRAR DETALLES
-  // ==========================================
 
   closeDetails(): void {
     this.stopCry();
@@ -171,106 +141,87 @@ export class PokemonListPage implements OnInit {
     this.selectedPokemon = null;
     this.galleryImages = [];
     this.expandedImage = null;
-    this.animationUrl = '';
-    this.animationAvailable = true;
     this.detailError = '';
     this.audioMessage = '';
+    this.loadingDetails = false;
   }
-
-  // ==========================================
-  // OBTENER ILUSTRACIÓN OFICIAL
-  // ==========================================
 
   getOfficialArtwork(pokemon: any): string {
-    return (
-      pokemon.sprites?.other?.['official-artwork']?.front_default ||
-      pokemon.sprites?.front_default ||
-      ''
-    );
+    return pokemon?.sprites?.other?.['official-artwork']?.front_default
+      || pokemon?.sprites?.front_default
+      || '';
   }
 
-  // ==========================================
-  // CONSTRUIR GALERÍA DE IMÁGENES
-  // ==========================================
-
   buildGallery(pokemon: any): GalleryImage[] {
-    const id = pokemon.id;
     const sprites = pokemon.sprites;
+    const id = pokemon.id;
 
     const candidates: GalleryImage[] = [
       {
         url: sprites?.other?.['official-artwork']?.front_default,
-        label: 'Ilustración oficial',
+        label: 'Ilustración oficial'
       },
       {
         url: sprites?.front_default,
-        label: 'Vista frontal',
+        label: 'Vista frontal'
       },
       {
         url: sprites?.back_default,
-        label: 'Vista posterior',
+        label: 'Vista posterior'
       },
       {
         url: sprites?.front_shiny,
-        label: 'Versión variocolor',
+        label: 'Versión variocolor'
       },
       {
         url: sprites?.back_shiny,
-        label: 'Vista posterior variocolor',
+        label: 'Posterior variocolor'
       },
       {
         url: sprites?.other?.home?.front_default,
-        label: 'Ilustración alternativa',
+        label: 'Ilustración alternativa'
       },
       {
         url: sprites?.other?.home?.front_shiny,
-        label: 'Ilustración alternativa variocolor',
+        label: 'Alternativa variocolor'
       },
       {
         url: sprites?.other?.dream_world?.front_default,
-        label: 'Ilustración Dream World',
+        label: 'Dream World'
       },
       {
         url: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
-        label: 'Sprite clásico',
+        label: 'Sprite clásico'
       },
       {
         url: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`,
-        label: 'Sprite posterior clásico',
+        label: 'Sprite posterior'
       },
       {
         url: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`,
-        label: 'Sprite variocolor clásico',
-      },
-      {
-        url: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/${id}.png`,
-        label: 'Sprite posterior variocolor',
-      },
+        label: 'Sprite variocolor'
+      }
     ];
 
-    const uniqueImages: GalleryImage[] = [];
     const seen = new Set<string>();
+    const unique: GalleryImage[] = [];
 
     for (const image of candidates) {
       if (image.url && !seen.has(image.url)) {
         seen.add(image.url);
-        uniqueImages.push(image);
+        unique.push(image);
       }
     }
 
-    return uniqueImages;
+    return unique;
   }
 
-  // ==========================================
-  // REPRODUCIR SONIDO
-  // ==========================================
-
   playCry(): void {
-    const cryUrl = this.selectedPokemon?.cries?.latest;
+    const cryUrl = this.selectedPokemon?.cries?.latest
+      || this.selectedPokemon?.cries?.legacy;
 
     if (!cryUrl) {
-      this.audioMessage =
-        'Este Pokémon no tiene un sonido disponible en la API.';
+      this.audioMessage = 'Este Pokémon no tiene sonido disponible.';
       return;
     }
 
@@ -291,20 +242,13 @@ export class PokemonListPage implements OnInit {
       this.audioMessage = 'No se pudo cargar el sonido.';
     };
 
-    this.audioPlayer.play().catch((error) => {
-      console.error('Error al reproducir el sonido:', error);
-
+    this.audioPlayer.play().catch(error => {
+      console.error('Error de audio:', error);
       this.audioPlaying = false;
       this.audioPlayer = null;
-
-      this.audioMessage =
-        'No se pudo reproducir el sonido. Inténtalo otra vez.';
+      this.audioMessage = 'No se pudo reproducir el sonido.';
     });
   }
-
-  // ==========================================
-  // DETENER SONIDO
-  // ==========================================
 
   stopCry(): void {
     if (this.audioPlayer) {
@@ -318,10 +262,6 @@ export class PokemonListPage implements OnInit {
     this.audioPlaying = false;
   }
 
-  // ==========================================
-  // ABRIR Y CERRAR IMÁGENES
-  // ==========================================
-
   openImage(image: GalleryImage): void {
     this.expandedImage = image;
   }
@@ -332,26 +272,12 @@ export class PokemonListPage implements OnInit {
 
   hideBrokenImage(event: Event, image: GalleryImage): void {
     const element = event.target as HTMLImageElement;
-    const galleryItem = element.closest(
-      '.gallery-item'
-    ) as HTMLElement | null;
+    const parent = element.closest('.gallery-item') as HTMLElement | null;
 
-    if (galleryItem) {
-      galleryItem.style.display = 'none';
+    if (parent) {
+      parent.style.display = 'none';
     }
   }
-
-  // ==========================================
-  // CONTROL DE ANIMACIÓN
-  // ==========================================
-
-  onAnimationError(): void {
-    this.animationAvailable = false;
-  }
-
-  // ==========================================
-  // NIVEL 3: ABRIR COMPARADOR
-  // ==========================================
 
   openCompareMode(): void {
     this.stopCry();
@@ -359,18 +285,12 @@ export class PokemonListPage implements OnInit {
     this.selectedPokemon = null;
     this.galleryImages = [];
     this.expandedImage = null;
-    this.animationUrl = '';
-    this.animationAvailable = true;
 
     this.compareMode = true;
     this.compareError = '';
     this.comparePokemonA = null;
     this.comparePokemonB = null;
   }
-
-  // ==========================================
-  // NIVEL 3: CERRAR COMPARADOR
-  // ==========================================
 
   closeCompareMode(): void {
     this.compareMode = false;
@@ -380,19 +300,14 @@ export class PokemonListPage implements OnInit {
     this.comparePokemonB = null;
   }
 
-  // ==========================================
-  // NIVEL 3: COMPARAR DOS POKÉMON
-  // ==========================================
-
   runComparison(): void {
     if (!this.compareNameA || !this.compareNameB) {
-      this.compareError = 'Selecciona los dos Pokémon.';
+      this.compareError = 'Selecciona dos Pokémon.';
       return;
     }
 
     if (this.compareNameA === this.compareNameB) {
-      this.compareError =
-        'Selecciona dos Pokémon diferentes.';
+      this.compareError = 'Selecciona dos Pokémon diferentes.';
       return;
     }
 
@@ -402,32 +317,21 @@ export class PokemonListPage implements OnInit {
     this.comparePokemonB = null;
 
     forkJoin({
-      first: this.pokemonService.getPokemonDetails(
-        this.compareNameA
-      ),
-      second: this.pokemonService.getPokemonDetails(
-        this.compareNameB
-      ),
+      first: this.pokemonService.getPokemonDetails(this.compareNameA),
+      second: this.pokemonService.getPokemonDetails(this.compareNameB)
     }).subscribe({
-      next: (result) => {
+      next: result => {
         this.comparePokemonA = result.first;
         this.comparePokemonB = result.second;
         this.compareLoading = false;
       },
-      error: (error) => {
-        console.error('Error al comparar Pokémon:', error);
-
-        this.compareError =
-          'No se pudieron cargar los Pokémon. Intenta nuevamente.';
-
+      error: error => {
+        console.error('Error de comparación:', error);
+        this.compareError = 'No se pudo completar la comparación.';
         this.compareLoading = false;
-      },
+      }
     });
   }
-
-  // ==========================================
-  // NIVEL 3: OBTENER ESTADÍSTICA COMPARATIVA
-  // ==========================================
 
   getCompareStat(pokemon: any, statName: string): number {
     const stat = pokemon?.stats?.find(
@@ -436,10 +340,6 @@ export class PokemonListPage implements OnInit {
 
     return stat?.base_stat ?? 0;
   }
-
-  // ==========================================
-  // ESTADÍSTICAS
-  // ==========================================
 
   getStatPercentage(value: number): number {
     return Math.min((value / 200) * 100, 100);
@@ -452,10 +352,10 @@ export class PokemonListPage implements OnInit {
       defense: '#60a5fa',
       'special-attack': '#c084fc',
       'special-defense': '#fbbf24',
-      speed: '#22d3ee',
+      speed: '#22d3ee'
     };
 
-    return colors[statName] || '#36d399';
+    return colors[statName] || '#ffd54f';
   }
 
   formatStatName(name: string): string {
@@ -463,15 +363,15 @@ export class PokemonListPage implements OnInit {
       hp: 'PS',
       attack: 'Ataque',
       defense: 'Defensa',
-      'special-attack': 'At. especial',
-      'special-defense': 'Def. especial',
-      speed: 'Velocidad',
+      'special-attack': 'Ataque especial',
+      'special-defense': 'Defensa especial',
+      speed: 'Velocidad'
     };
 
     return names[name] || name;
   }
 
   formatName(name: string): string {
-    return name.replace('-', ' ');
+    return name.replace(/-/g, ' ');
   }
 }

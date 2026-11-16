@@ -12,23 +12,22 @@ describe('HomePage', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [HomePage],
-      imports: [IonicModule.forRoot()],
-      providers: [
+    declarations: [HomePage],
+    imports: [IonicModule.forRoot()],
+    providers: [
         {
-          provide: PokemonService,
-          useValue: {
-            getPokemons: () =>
-              of({
-                count: 0,
-                next: null,
-                previous: null,
-                results: [],
-              }),
-          },
+            provide: PokemonService,
+            useValue: {
+                getPokemons: () => of({
+                    count: 0,
+                    next: null,
+                    previous: null,
+                    results: [],
+                }),
+            },
         },
-      ],
-    }).compileComponents();
+    ],
+}).compileComponents();
 
     fixture = TestBed.createComponent(HomePage);
     component = fixture.componentInstance;

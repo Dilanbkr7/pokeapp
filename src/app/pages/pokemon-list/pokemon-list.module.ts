@@ -9,12 +9,12 @@ import { PokemonListPageRoutingModule } from './pokemon-list-routing.module';
 import { PokemonListPage } from './pokemon-list.page';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    PokemonListPageRoutingModule
-  ],
-  declarations: [PokemonListPage]
+    imports: [
+        CommonModule,
+        FormsModule,
+        IonicModule,
+        PokemonListPageRoutingModule,
+        PokemonListPage
+    ]
 })
 export class PokemonListPageModule {}
