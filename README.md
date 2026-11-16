@@ -130,7 +130,7 @@ Versiones declaradas en el `package.json` del repositorio:
 ### Ejecutar en el navegador
 
 ```bash
-git clone https://github.com/Dilanbkr7/pokeapp.git
+git clone -b release/pokedex-mobile https://github.com/Dilanbkr7/pokeapp.git
 cd pokeapp
 npm ci
 npm start
