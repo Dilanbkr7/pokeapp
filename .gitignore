@@ -68,3 +68,12 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Android release credentials
+*.jks
+*.keystore
+*.p12
+*.pfx
+keystore.properties
+key.properties
+/android/app/release/output-metadata.json

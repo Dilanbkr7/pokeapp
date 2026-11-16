@@ -1,4 +1,4 @@
-# PokéApp · Pokédex móvil
+# Pokedex Mobile
 
 Aplicación desarrollada para la asignatura **Aplicaciones Móviles**, que permite explorar Pokémon, consultar sus características, reproducir sus sonidos y comparar sus estadísticas mediante el consumo de **PokéAPI**.
 
@@ -7,7 +7,7 @@ Aplicación desarrollada para la asignatura **Aplicaciones Móviles**, que permi
 
 ## Capturas en celular
 
-Evidencias proporcionadas de la aplicación en un dispositivo Android, organizadas según las tres etapas del trabajo.
+Nueve capturas reales tomadas en un teléfono Android, agrupadas por pantalla. Corresponden a la compilación debug.
 
 ### Nivel 1 · Catálogo, búsqueda y estadísticas
 
@@ -61,6 +61,8 @@ Evidencias proporcionadas de la aplicación en un dispositivo Android, organizad
 - [Funcionalidades por nivel](#funcionalidades-por-nivel)
 - [Tecnologías](#tecnologías)
 - [Instalación y ejecución](#instalación-y-ejecución)
+- [APK release firmado](#apk-release-firmado)
+- [Pruebas funcionales en Android](#pruebas-funcionales-en-android)
 - [Uso de la API](#uso-de-la-api)
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Estado y alcance](#estado-y-alcance)
@@ -68,7 +70,7 @@ Evidencias proporcionadas de la aplicación en un dispositivo Android, organizad
 
 ## Descripción
 
-PokéApp presenta un catálogo de Pokémon mediante tarjetas con su número, nombre e ilustración oficial. Desde el buscador se puede filtrar el catálogo y acceder a una ficha con información general, recursos multimedia, estadísticas y habilidades.
+Pokedex Mobile presenta un catálogo de Pokémon mediante tarjetas con su número, nombre e ilustración. Desde el buscador se puede filtrar el catálogo y acceder a una ficha con información general, recursos multimedia, estadísticas y habilidades.
 
 La interfaz utiliza un tema oscuro con acentos verdes, una cuadrícula adaptable y barras de colores para facilitar la lectura de las estadísticas. El proyecto incluye una plataforma Android configurada con Capacitor.
 
@@ -123,7 +125,7 @@ Versiones declaradas en el `package.json` del repositorio:
 - Git.
 - Node.js y npm compatibles con Angular 18.
 - Conexión a Internet para consultar los datos y cargar imágenes y sonidos.
-- Android Studio y el SDK de Android para ejecutar la versión nativa.
+- Android Studio, JDK 17, Android SDK Platform 34, Build-Tools 34.0.0 y Platform-Tools. El proyecto usa Gradle 8.2.1 y Android Gradle Plugin 8.2.1.
 
 ### Ejecutar en el navegador
 
@@ -168,6 +170,42 @@ En Android Studio, esperar la sincronización de Gradle, seleccionar un celular 
 | `npm test` | Ejecuta las pruebas configuradas con Jasmine y Karma |
 | `npm run lint` | Ejecuta el análisis estático con ESLint |
 
+## APK release firmado
+
+Identificador `com.pokedex.mobile`, versión `1.0.0`, código de versión `1`, Android mínimo API 22 y objetivo API 34.
+
+1. Ejecutar `npm ci`, `npm run build` y `npx cap sync android` desde la raíz del repositorio.
+2. Abrir `android/` con `npx cap open android`. En **Settings → Build, Execution, Deployment → Build Tools → Gradle**, seleccionar JDK 17 como **Gradle JDK**. Para usar el wrapper desde PowerShell, apuntar `JAVA_HOME` a JDK 17 y comprobar la versión con `.\gradlew.bat --version` desde `android/`.
+3. Seleccionar **Build → Generate Signed App Bundle or APK → APK** y el módulo `app`. Para la primera versión, crear el keystore fuera del repositorio con el alias `pokedex-mobile`. Para actualizaciones, usar el mismo archivo y alias. Introducir las contraseñas en Android Studio y guardar una copia privada del keystore.
+4. Seleccionar la variante **release** y una carpeta de salida. Localizar `app-release.apk` y ejecutar estos comandos desde su carpeta, con `ANDROID_HOME` apuntando al SDK y `JAVA_HOME` a JDK 17.
+
+   ```powershell
+   $appApk = '.\app-release.apk'
+   & "$env:ANDROID_HOME\build-tools\34.0.0\apksigner.bat" verify --verbose --print-certs $appApk
+   Get-FileHash -Algorithm SHA256 -LiteralPath $appApk
+   & "$env:ANDROID_HOME\platform-tools\adb.exe" devices -l
+   & "$env:ANDROID_HOME\platform-tools\adb.exe" install -r $appApk
+   ```
+
+5. Repetir las pruebas funcionales de la tabla con el APK release. Si Android rechaza la instalación porque la variante debug tiene otro certificado, usar un emulador o dispositivo limpio para conservar la instalación y los datos del teléfono.
+
+Para enviar el APK a Uptodown, completar la ficha, adjuntar capturas reales y confirmar los derechos de distribución de los recursos de terceros. El estado **Pending** identifica un APK enviado a revisión.
+
+## Pruebas funcionales en Android
+
+El autor reportó **8 de 8 pruebas manuales superadas** con la compilación debug instalada en su teléfono. Este es el plan para repetirlas con la variante release.
+
+| Prueba | Verificación | Resultado en debug |
+| --- | --- | --- |
+| Inicio | Abre la aplicación y carga el catálogo | Correcto |
+| Buscador | Filtra el catálogo por nombre | Correcto |
+| Detalles | Abre una ficha con características y estadísticas | Correcto |
+| Sonido | Reproduce el sonido desde la ficha | Correcto |
+| Galería | Muestra y amplía las imágenes | Correcto |
+| Comparador | Compara dos Pokémon y sus estadísticas | Correcto |
+| Validación | Detecta una selección inválida en el comparador | Correcto |
+| Reapertura | La aplicación vuelve a abrir después de cerrarla | Correcto |
+
 ## Uso de la API
 
 El servicio `PokemonService` centraliza las peticiones con `HttpClient` y devuelve observables.
@@ -199,7 +237,8 @@ pokeapp/
 │   ├── assets/                       # Recursos estáticos
 │   ├── environments/                 # Configuración por entorno
 │   ├── theme/                        # Variables de estilos
-│   └── global.scss                   # Estilos globales
+│   ├── global.scss                   # Estilos globales
+│   └── main.ts                       # Arranque standalone de la aplicación
 ├── docs/capturas/                    # Evidencias de los tres niveles
 ├── angular.json                     # Configuración de Angular
 ├── capacitor.config.ts              # Configuración de Capacitor
@@ -210,10 +249,10 @@ pokeapp/
 
 - El catálogo y los selectores trabajan con los primeros 50 Pokémon; no se implementa paginación en la interfaz actual.
 - La cantidad de imágenes y la disponibilidad de sonido dependen de los recursos de cada Pokémon.
-- El repositorio incluye configuración de pruebas automatizadas; esta documentación no afirma que dichas pruebas hayan sido ejecutadas o aprobadas.
+- El repositorio incluye configuración para pruebas automatizadas con Jasmine y Karma.
 
 ## Créditos
 
 Desarrollado por **[Dilan Obando](https://github.com/Dilanbkr7)** como trabajo en clase de **Aplicaciones Móviles**.
 
-Datos proporcionados por [PokéAPI](https://pokeapi.co/) y recursos visuales de [PokeAPI/sprites](https://github.com/PokeAPI/sprites). Pokémon y sus personajes pertenecen a sus respectivos titulares. Proyecto con fines educativos.
+Datos proporcionados por [PokéAPI](https://pokeapi.co/) y recursos visuales de [PokeAPI/sprites](https://github.com/PokeAPI/sprites). Pokémon y sus personajes pertenecen a sus respectivos titulares. Pokedex Mobile es un proyecto educativo independiente.
