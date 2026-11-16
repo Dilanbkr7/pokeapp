@@ -1,7 +1,6 @@
-
 <ion-header>
   <ion-toolbar class="main-toolbar">
-    <ion-title>POKEDEX</ion-title>
+    <ion-title>Pokedex Mobile</ion-title>
 
     <ion-buttons slot="end">
       <!-- VOLVER DESDE LOS DETALLES -->
@@ -50,14 +49,19 @@
   <ng-container *ngIf="!selectedPokemon && !compareMode">
 
     <section class="intro">
-      <span class="eyebrow">
-        APLICACIONES MOVILES - DILAN OBANDO
-      </span>
 
-      <h1>Descubre tu Pokémon.</h1>
-      <p>Explora, busca y conoce sus estadísticas.</p>
-    </section>
-
+      <img
+      src="assets/mascota.png"
+      alt="Mascota de Pokedex Mobile"
+      class="mascota-home"
+    />
+    <span class="eyebrow">
+      POKEDEX MOBILE
+    </span>
+    <h1>¡Explora el mundo Pokémon!</h1>
+    <p>
+      Descubre, escucha y compara tus Pokémon favoritos.
+    </p>
     <!-- BUSCADOR -->
     <ion-searchbar
       class="pokemon-search"
