@@ -246,10 +246,7 @@ La aplicación fue registrada en **Uptodown Developers Console** y el archivo An
 
 Las siguientes capturas documentan el proceso de configuración y envío de la aplicación. Se conservan como evidencia de la versión remitida a revisión.
 
-<details>
-  <summary><strong>Ver las 8 evidencias de publicación</strong></summary>
-
-  <table>
+#### Evidencias visuales de Uptodown`r`n`r`n<table>
     <tr>
       <td align="center" width="50%">
         <img src="docs/capturas/uptodown/01-envio-confirmado.jpeg" alt="Confirmación de envío exitoso a los editores" width="480"><br>
@@ -299,7 +296,7 @@ Las siguientes capturas documentan el proceso de configuración y envío de la a
       </td>
     </tr>
   </table>
-</details>
+
 
 La revisión del APK y la aprobación de los recursos gráficos son estados gestionados por Uptodown. La disponibilidad pública dependerá de la resolución editorial de la plataforma.
 
