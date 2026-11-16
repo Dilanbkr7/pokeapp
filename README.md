@@ -389,10 +389,3 @@ PokéAPI se utiliza como fuente técnica de datos. La disponibilidad de sus recu
 <sub>Documentación técnica y evidencias de distribución.</sub>
 
 </div>
-'''
-
-out = Path("/mnt/data/README-Pokedex-Mobile.md")
-out.write_text(readme, encoding="utf-8", newline="\n")
-print(f"Archivo creado: {out.name}")
-print(f"Tamaño: {out.stat().st_size:,} bytes")
-print(f"Líneas: {len(readme.splitlines()):,}")
